@@ -11,12 +11,27 @@ namespace Task6_OS
         private readonly int _memorySize;
         private readonly int _segmentSize;
         public LinkedList<Segment> Segments { get; private set; }
-        public List<Process> Processes { get; private set; }
+        public List<ProcessInfo> Processes { get; private set; }
+        public int FreeMemory
+        {
+            get
+            {
+                int Count = 0;
+                foreach (var segment in Segments)
+                {
+                    if (segment.Process == null)
+                    {
+                        Count++;
+                    }
+                }
+                return Count;
+            }
+        }
         public Memory(int memorySize, int segmentSize)
         {
             _memorySize = memorySize;
             _segmentSize = segmentSize;
-            Processes = new List<Process>();
+            Processes = new List<ProcessInfo>();
             Segments = new LinkedList<Segment>();
             int segmentsCount = memorySize / segmentSize;
             for (int i = 0; i < segmentsCount; i++)
@@ -53,13 +68,24 @@ namespace Task6_OS
                         }
                         node = node.Next;
                     }
-                    Processes.Add(process);
+                    ProcessInfo processInfo = new ProcessInfo(process, firstSegment);
+                    Processes.Add(processInfo);
                 }
             }
         }
-        public void Unload(int index)
+        public void Unload(int id)
         {
-
+            ProcessInfo processInfo = Processes.Find(pInfo => pInfo.Process.Id == id);
+            if (processInfo != null)
+            {
+                var node = Segments.Find(processInfo.FirstSegment);
+                for (int i = 0; i < processInfo.Length; i++)
+                {
+                    node.ValueRef.Clear();
+                    node = node.Next;
+                }
+                Processes.Remove(processInfo);
+            }
         }
         private Segment FindFreeSpace(int neededSegments)
         {
@@ -98,7 +124,7 @@ namespace Task6_OS
         }
         public override string ToString()
         {
-            return $"Segments: {Segments.Count}. Segment size: {Segments.First.Value.Cells.Count}";
+            return $"Segments: {Segments.Count}. Segment size: {_segmentSize}";
         }
         public void Visualize()
         {
@@ -110,6 +136,7 @@ namespace Task6_OS
                 }
                 Console.Write(" ");
             }
+            Console.WriteLine();
         }
         public Segment this[int index]
         {
