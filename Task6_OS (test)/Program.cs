@@ -27,6 +27,12 @@ namespace Task6_OS
             m.Unload(3);
             m.Visualize();
             m.Compact();
+            m.Compact();
+            m.Compact();
+            m.Compact();
+            m.Visualize();
+            m.Unload(1);
+            m.Compact();
             m.Visualize();
             Console.WriteLine(m.FreeMemory);
         }

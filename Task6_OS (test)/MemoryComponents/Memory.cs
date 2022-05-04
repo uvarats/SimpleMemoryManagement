@@ -140,12 +140,8 @@ namespace Task6_OS
             var firstAssignedNode = firstFreeNode.Next; // предполагаю, что следующий сегмент уже занят процессом
             while (firstAssignedNode != null)
             {
-                while (firstAssignedNode != null)
+                while (firstAssignedNode != null && firstAssignedNode.ValueRef.Process == null)
                 {
-                    if (firstAssignedNode.ValueRef.Process != null)
-                    {
-                        break;
-                    }
                     firstAssignedNode = firstAssignedNode.Next;
                 }
                 if (firstAssignedNode != null)
