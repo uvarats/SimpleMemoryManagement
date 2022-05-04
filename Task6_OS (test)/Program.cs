@@ -6,7 +6,7 @@ namespace Task6_OS
     {
         static void Main(string[] args)
         {
-            Memory m = new Memory(512, 4);
+            Memory m = Memory.GetInstance(512, 4);
             try
             {
                 m.Load(new Process(50));
@@ -21,6 +21,12 @@ namespace Task6_OS
             }
             m.Unload(2);
             m.Unload(4);
+            m.Visualize();
+            m.Compact();
+            m.Visualize();
+            m.Unload(3);
+            m.Visualize();
+            m.Compact();
             m.Visualize();
             Console.WriteLine(m.FreeMemory);
         }

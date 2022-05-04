@@ -9,7 +9,7 @@ namespace Task6_OS
     public class ProcessInfo
     {
         public Process Process { get; private set; }
-        public Segment FirstSegment { get; private set; }
+        public Segment FirstSegment { get; set; }
         public int Length // в сегментах
         {
             get

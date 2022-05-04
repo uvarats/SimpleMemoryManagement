@@ -8,6 +8,7 @@ namespace Task6_OS
 {
     public class Memory
     {
+        private static Memory _instance;
         private readonly int _memorySize;
         private readonly int _segmentSize;
         public LinkedList<Segment> Segments { get; private set; }
@@ -27,7 +28,7 @@ namespace Task6_OS
                 return Count;
             }
         }
-        public Memory(int memorySize, int segmentSize)
+        private Memory(int memorySize, int segmentSize)
         {
             _memorySize = memorySize;
             _segmentSize = segmentSize;
@@ -38,6 +39,14 @@ namespace Task6_OS
             {
                 Segments.AddLast(new Segment(segmentSize));
             }
+        }
+        public static Memory GetInstance(int memorySize, int segmentSize)
+        {
+            if (_instance == null)
+            {
+                _instance = new Memory(memorySize, segmentSize);
+            }
+            return _instance;
         }
 
         public void Load(Process process)
@@ -87,23 +96,25 @@ namespace Task6_OS
                 Processes.Remove(processInfo);
             }
         }
-        private Segment FindFreeSpace(int neededSegments)
+        private Segment FirstFreeSegment(List<Segment> segments)
         {
-            int firstFreeSegment = 0;
-            List<Segment> segments = new List<Segment>(Segments);
             for (int i = 0; i < segments.Count; i++)
             {
                 if (segments[i].Process == null)
                 {
-                    firstFreeSegment = i;
-                    break;
+                    return segments[i];
                 }
             }
+            return null;
+        }
+        private Segment FindFreeSpace(int neededSegments)
+        {
+            List<Segment> segments = new List<Segment>(Segments);
+            Segment firstFreeSegment = FirstFreeSegment(segments);
 
-            int startSegment = firstFreeSegment;
-            int segmentsCounter = 0; // так как уже как минимум первый сегмент свободен
-            // соответственно начинаем считать со следующего
-            for (int i = firstFreeSegment; i < segments.Count; i++)
+            int startSegment = segments.IndexOf(firstFreeSegment);
+            int segmentsCounter = 0; 
+            for (int i = startSegment; i < segments.Count; i++)
             {
                 if (segments[i].Process == null)
                 {
@@ -121,6 +132,45 @@ namespace Task6_OS
                 }
             }
             return null;
+        }
+        public void Compact() // функция уплотнения
+        {
+            List<Segment> segments = new List<Segment>(Segments);
+            var firstFreeNode = Segments.Find(FirstFreeSegment(segments));
+            var firstAssignedNode = firstFreeNode.Next; // предполагаю, что следующий сегмент уже занят процессом
+            while (firstAssignedNode != null)
+            {
+                while (firstAssignedNode != null)
+                {
+                    if (firstAssignedNode.ValueRef.Process != null)
+                    {
+                        break;
+                    }
+                    firstAssignedNode = firstAssignedNode.Next;
+                }
+                if (firstAssignedNode != null)
+                {
+                    Processes.Find(pInfo => pInfo.Process == firstAssignedNode.ValueRef.Process)
+                        .FirstSegment = firstFreeNode.ValueRef;
+                    while (true)
+                    {
+                        if (firstAssignedNode == null || firstAssignedNode.ValueRef.Process == null)
+                        {
+                            break;
+                        }
+                        // перезапись ячеек
+                        for (int i = 0; i < _segmentSize; i++)
+                        {
+                            firstFreeNode.ValueRef.Cells[i].Process = firstAssignedNode.ValueRef.Cells[i].Process;
+                        }
+                        firstFreeNode.ValueRef.Process = firstAssignedNode.ValueRef.Process;
+                        firstAssignedNode.ValueRef.Clear();
+                        // перевод указателей вперед
+                        firstFreeNode = firstFreeNode.Next;
+                        firstAssignedNode = firstAssignedNode.Next;
+                    }
+                }
+            }
         }
         public override string ToString()
         {
