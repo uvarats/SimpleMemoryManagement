@@ -152,12 +152,8 @@ namespace Task6_OS
                 {
                     Processes.Find(pInfo => pInfo.Process == firstAssignedNode.ValueRef.Process)
                         .FirstSegment = firstFreeNode.ValueRef;
-                    while (true)
+                    while (firstAssignedNode != null && firstAssignedNode.ValueRef.Process != null)
                     {
-                        if (firstAssignedNode == null || firstAssignedNode.ValueRef.Process == null)
-                        {
-                            break;
-                        }
                         // перезапись ячеек
                         for (int i = 0; i < _segmentSize; i++)
                         {
