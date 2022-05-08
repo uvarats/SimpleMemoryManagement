@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Task6_OS
 {
-    public enum ProcessState
+    public enum ProcessLocation
     {
         InMemory,
         InSwap,

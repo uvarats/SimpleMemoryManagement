@@ -49,18 +49,16 @@ namespace Task6_OS
             return _instance;
         }
 
-        public void Load(Process process)
+        public LoadingResult TryLoad(Process process)
         {
             int neededSegments = (int) Math.Ceiling(process.Size * 1.0 / _segmentSize);
+            if (neededSegments > FreeMemory)
+            {
+                return LoadingResult.NotEnoughMemory;
+            }
             if (neededSegments != 0)
             {
                 Segment firstSegment = FindFreeSpace(neededSegments);
-
-                if(firstSegment == null)
-                {
-                    throw new AggregateException($"Process {process.Id} too large, can not find free space.");
-                }
-
                 if (firstSegment != null)
                 {
                     var node = Segments.Find(firstSegment);
@@ -79,12 +77,14 @@ namespace Task6_OS
                     }
                     ProcessInfo processInfo = new ProcessInfo(process, firstSegment);
                     Processes.Add(processInfo);
+                    return LoadingResult.Success;
                 }
+                return LoadingResult.CannotFindFreeSpace;
             }
+            return LoadingResult.ProcessSizeIsNull;
         }
-        public void Unload(int id)
+        public void Unload(ProcessInfo processInfo)
         {
-            ProcessInfo processInfo = Processes.Find(pInfo => pInfo.Process.Id == id);
             if (processInfo != null)
             {
                 var node = Segments.Find(processInfo.FirstSegment);
@@ -95,6 +95,15 @@ namespace Task6_OS
                 }
                 Processes.Remove(processInfo);
             }
+        }
+        public void Unload(int id)
+        {
+            ProcessInfo processInfo = Processes.Find(pInfo => pInfo.Process.Id == id);
+            Unload(processInfo);
+        }
+        public void Unload(Process process)
+        {
+            Unload(process.Id);
         }
         private Segment FirstFreeSegment(List<Segment> segments)
         {
@@ -148,6 +157,7 @@ namespace Task6_OS
                 {
                     Processes.Find(pInfo => pInfo.Process == firstAssignedNode.ValueRef.Process)
                         .FirstSegment = firstFreeNode.ValueRef;
+                    // цикл до тех пор, пока не "упрусь" в конец памяти, либо не дойду до свободного сегмента
                     while (firstAssignedNode != null && firstAssignedNode.ValueRef.Process != null)
                     {
                         // перезапись ячеек

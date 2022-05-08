@@ -26,5 +26,9 @@ namespace Task6_OS
         {
             Processes = new List<Process>();
         }
+        public void Add(Process p)
+        {
+            Processes.Add(p);
+        }
     }
 }

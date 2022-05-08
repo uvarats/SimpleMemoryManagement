@@ -24,9 +24,55 @@ namespace Task6_OS
             }
             return _instance;
         }
+        public static CPU GetInstance()
+        {
+            if (_instance == null)
+            {
+                _instance = new CPU(512, 4);
+            }
+            return _instance;
+        }
+        private void UnloadSleeping()
+        {
+            foreach (var process in Memory.Processes)
+            {
+                if (process.Process.State == ProcessState.Sleeping)
+                {
+                    Memory.Unload(process.Process);
+                    Swap.Add(process.Process);
+                    process.Process.Location = ProcessLocation.InSwap;
+                }
+            }
+        }
         public void LoadProcess(Process process)
         {
-            Memory.Load(process);
+            LoadingResult loadingResult = LoadingResult.Unknown;
+            while (loadingResult != LoadingResult.Success)
+            {
+                loadingResult = Memory.TryLoad(process);
+                switch (loadingResult)
+                {
+                    case LoadingResult.NotEnoughMemory:
+                        UnloadSleeping();
+                        break;
+                    case LoadingResult.CannotFindFreeSpace:
+                        Memory.Compact();
+                        break;
+                    case LoadingResult.ProcessSizeIsNull:
+                    case LoadingResult.Unknown:
+                        throw new ArgumentException($"{process.Id} - {loadingResult}");
+                    default:
+                        break;
+                }
+            }
+        }
+        public void Action(Process process)
+        {
+            if (process.Location == ProcessLocation.InSwap)
+            {
+                LoadProcess(process);
+                process.Location = ProcessLocation.InMemory;
+            }
         }
     }
 }
