@@ -9,6 +9,7 @@ namespace Task6_OS
     public class CPU
     {
         private static CPU _instance;
+        private object _lock = new object();
         public Swap Swap { get; private set; }
         public Memory Memory { get; private set; }
         private CPU(int memorySize, int segmentSize)
@@ -32,53 +33,35 @@ namespace Task6_OS
             }
             return _instance;
         }
-        private void UnloadSleeping()
+        //private void UnloadSleeping()
+        //{
+        //    for (int i = 0; i < Memory.Processes.Count; i++)
+        //    {
+        //        var process = Memory.Processes[i];
+        //        if (process.Process.State == ProcessState.Sleeping)
+        //        {
+        //            Memory.Unload(process);
+        //            Swap.Add(process.Process);
+        //            process.Process.Location = ProcessLocation.InSwap;
+        //            break;
+        //        }
+        //    }
+        //}
+        public LoadingResult LoadProcess(Process process)
         {
-            foreach (var process in Memory.Processes)
-            {
-                if (process.Process.State == ProcessState.Sleeping)
-                {
-                    Memory.Unload(process.Process);
-                    Swap.Add(process.Process);
-                    process.Process.Location = ProcessLocation.InSwap;
-                }
-            }
+            return Memory.TryLoad(process);
         }
-        public bool LoadProcess(Process process)
-        {
-            if (process.Size > Memory.Size)
-            {
-                return false;
-            }
-            LoadingResult loadingResult = LoadingResult.Unknown;
-            while (loadingResult != LoadingResult.Success)
-            {
-                loadingResult = Memory.TryLoad(process);
-                switch (loadingResult)
-                {
-                    case LoadingResult.NotEnoughMemory:
-                        UnloadSleeping();
-                        break;
-                    case LoadingResult.CannotFindFreeSpace:
-                        Memory.Compact();
-                        break;
-                    case LoadingResult.ProcessSizeIsNull:
-                    case LoadingResult.Unknown:
-                        throw new ArgumentException($"{process.Id} - {loadingResult}");
-                    default:
-                        break;
-                }
-            }
-            return true;
-        }
-        public void Action(Process process)
-        {
-            if (process.Location == ProcessLocation.InSwap)
-            {
-                Swap.Processes.Remove(process);
-                LoadProcess(process);
-                process.Location = ProcessLocation.InMemory;
-            }
-        }
+        //public void Action(Process process)
+        //{
+        //    if (process.Location == ProcessLocation.InSwap)
+        //    {
+        //        lock (_lock)
+        //        {
+        //            Swap.Processes.Remove(process);
+        //            LoadProcess(process);
+        //            process.Location = ProcessLocation.InMemory;
+        //        }
+        //    }
+        //}
     }
 }

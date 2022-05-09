@@ -11,4 +11,8 @@
     <ProjectReference Include="..\Task6_OS (test)\Task6_OS (test).csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+
 </Project>

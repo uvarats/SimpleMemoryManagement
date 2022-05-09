@@ -7,8 +7,8 @@ namespace Task6_OS
         static void Main(string[] args)
         {
             CPU cpu = CPU.GetInstance(512, 4);
-            cpu.LoadProcess(new Process(32));
-            cpu.Memory.Visualize();
+            cpu.Memory.TryLoad(new Process(512));
+            cpu.Memory.FindFreeSpace(200);
         }
     }
 }

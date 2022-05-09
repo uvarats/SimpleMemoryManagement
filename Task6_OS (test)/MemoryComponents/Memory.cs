@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,7 +13,7 @@ namespace Task6_OS
         private readonly int _memorySize;
         private readonly int _segmentSize;
         public LinkedList<Segment> Segments { get; private set; }
-        public List<ProcessInfo> Processes { get; private set; }
+        public ObservableCollection<ProcessInfo> Processes { get; private set; }
         public int FreeMemory
         {
             get
@@ -35,11 +36,18 @@ namespace Task6_OS
                 return _memorySize;
             }
         }
+        public int SegmentSize
+        {
+            get
+            {
+                return _segmentSize;
+            }
+        }
         private Memory(int memorySize, int segmentSize)
         {
             _memorySize = memorySize;
             _segmentSize = segmentSize;
-            Processes = new List<ProcessInfo>();
+            Processes = new ObservableCollection<ProcessInfo>();
             Segments = new LinkedList<Segment>();
             int segmentsCount = memorySize / segmentSize;
             for (int i = 0; i < segmentsCount; i++)
@@ -105,7 +113,7 @@ namespace Task6_OS
         }
         public void Unload(int id)
         {
-            ProcessInfo processInfo = Processes.Find(pInfo => pInfo.Process.Id == id);
+            ProcessInfo processInfo = Processes.Single(pInfo => pInfo.Process.Id == id);
             Unload(processInfo);
         }
         public void Unload(Process process)
@@ -123,29 +131,33 @@ namespace Task6_OS
             }
             return null;
         }
-        private Segment FindFreeSpace(int neededSegments)
+        public Segment FindFreeSpace(int neededSegments)
         {
             List<Segment> segments = new List<Segment>(Segments);
             Segment firstFreeSegment = FirstFreeSegment(segments);
 
             int startSegment = segments.IndexOf(firstFreeSegment);
-            int segmentsCounter = 0; 
-            for (int i = startSegment; i < segments.Count; i++)
+            int segmentsCounter = 0;
+            if (startSegment != -1)
             {
-                if (segments[i].Process == null)
+                for (int i = startSegment; i < segments.Count; i++)
                 {
-                    segmentsCounter++;
-                } else
-                {
-                    startSegment = i + 1;
-                    segmentsCounter = 0;
-                    continue; // не имеет смысла выполнять следующую проверку.
-                }
+                    if (segments[i].Process == null)
+                    {
+                        segmentsCounter++;
+                    }
+                    else
+                    {
+                        startSegment = i + 1;
+                        segmentsCounter = 0;
+                        continue; // не имеет смысла выполнять следующую проверку.
+                    }
 
-                if (segmentsCounter == neededSegments)
-                {
-                    return segments[startSegment];
-                }
+                    if (segmentsCounter == neededSegments)
+                    {
+                        return segments[startSegment];
+                    }
+                } 
             }
             return null;
         }
@@ -162,7 +174,7 @@ namespace Task6_OS
                 }
                 if (firstAssignedNode != null)
                 {
-                    Processes.Find(pInfo => pInfo.Process == firstAssignedNode.ValueRef.Process)
+                    Processes.Single(pInfo => pInfo.Process == firstAssignedNode.ValueRef.Process)
                         .FirstSegment = firstFreeNode.ValueRef;
                     // цикл до тех пор, пока не "упрусь" в конец памяти, либо не дойду до свободного сегмента
                     while (firstAssignedNode != null && firstAssignedNode.ValueRef.Process != null)

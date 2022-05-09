@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,11 +21,11 @@ namespace Task6_OS
                 return _instance;
             }
         }
-        public List<Process> Processes { get; set; }
+        public ObservableCollection<Process> Processes { get; set; }
 
         private Swap()
         {
-            Processes = new List<Process>();
+            Processes = new ObservableCollection<Process>();
         }
         public void Add(Process p)
         {

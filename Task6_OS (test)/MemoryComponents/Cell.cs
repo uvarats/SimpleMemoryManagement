@@ -26,10 +26,16 @@ namespace Task6_OS
                 {
                     if (value != null)
                     {
-                        Check.Checked = true;
+                        Check.BeginInvoke(new Action(() =>
+                        {
+                            Check.Checked = true;
+                        }));
                     } else
                     {
-                        Check.Checked = false;
+                        Check.BeginInvoke(new Action(() =>
+                        {
+                            Check.Checked = false;
+                        }));
                     }
                 }
                 process = value;

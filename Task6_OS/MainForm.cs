@@ -7,13 +7,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Task6_OS.Properties;
 
 namespace Task6_OS
 {
     public partial class MainForm : Form
     {
         private CPU cpu;
-        private Timer testTimer;
         public MainForm()
         {
             InitializeComponent();
@@ -23,16 +23,22 @@ namespace Task6_OS
         {
             const int maxCellsPerLine = 32;
 
-            int memorySize = 512;
-            int segmentSize = 4;
+            MemorySetupForm setupForm = new MemorySetupForm();
+            if (setupForm.ShowDialog() != DialogResult.OK)
+                return;
 
-            cpu = CPU.GetInstance(memorySize, segmentSize);
+            cpu = CPU.GetInstance();
 
-            int totalLines = memorySize / maxCellsPerLine;
+            int memorySize = cpu.Memory.Size;
+            int segmentSize = cpu.Memory.SegmentSize;
+
+            int totalLines = (int) Math.Ceiling(memorySize * 1.0 / maxCellsPerLine);
             int segmentsPerLine = maxCellsPerLine / segmentSize;
+
+            // обработать ситуацию, когда ячеек меньше, чем 32
             
             int X = 20;
-            int Y = 20;
+            int Y = 30;
 
             var segment = cpu.Memory.Segments.First;
             
@@ -62,16 +68,34 @@ namespace Task6_OS
                 X = 20;
                 Y += 20;
             }
-            cpu.LoadProcess(new Process(50));
-            cpu.LoadProcess(new Process(120));
-            testTimer = new Timer();
-            testTimer.Tick += (s, e) => 
+        }
+
+        private void compactMemoryButton_Click(object sender, EventArgs e)
+        {
+            cpu.Memory.Compact();
+        }
+
+        private void loadButton_Click(object sender, EventArgs e)
+        {
+            int processSize = Convert.ToInt32(processSizeUpDown.Value);
+            LoadingResult result = cpu.LoadProcess(new Process(processSize));
+            switch (result)
             {
-                Random r = new Random();
-                cpu.LoadProcess(new Process(r.Next(4, 64)));
-            };
-            testTimer.Interval = 5000;
-            testTimer.Start();
+                case LoadingResult.Success:
+                    break;
+                case LoadingResult.NotEnoughMemory:
+                    MessageBox.Show("Недосточно памяти.");
+                    break;
+                case LoadingResult.CannotFindFreeSpace:
+                    MessageBox.Show("Невозможно найти свободное пространство, попробуйте уплотнить память.");
+                    break;
+                case LoadingResult.ProcessSizeIsNull:
+                    break;
+                case LoadingResult.Unknown:
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }
