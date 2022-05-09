@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Task6_OS
 {
@@ -174,11 +175,19 @@ namespace Task6_OS
                 }
                 if (firstAssignedNode != null)
                 {
-                    Processes.Single(pInfo => pInfo.Process == firstAssignedNode.ValueRef.Process)
-                        .FirstSegment = firstFreeNode.ValueRef;
+                    Process p = null;   //запоминаем текущий переносящийся процесс, чтобы
+                                        //перенести указатели первого сегмента для всех процессов, иначе
+                                        //последующие уплотнения будут приводить к ошибкам
+
                     // цикл до тех пор, пока не "упрусь" в конец памяти, либо не дойду до свободного сегмента
                     while (firstAssignedNode != null && firstAssignedNode.ValueRef.Process != null)
                     {
+                        if (p != firstAssignedNode.Value.Process)
+                        {
+                            p = firstAssignedNode.Value.Process;
+                            Processes.Single(pInfo => pInfo.Process == firstAssignedNode.ValueRef.Process)
+                                .FirstSegment = firstFreeNode.ValueRef;
+                        }
                         // перезапись ячеек
                         for (int i = 0; i < _segmentSize; i++)
                         {

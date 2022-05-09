@@ -32,6 +32,7 @@
             this.memoryList = new System.Windows.Forms.ListView();
             this.processIdColumn1 = new System.Windows.Forms.ColumnHeader();
             this.processSizeColumn1 = new System.Windows.Forms.ColumnHeader();
+            this.firstSegmentColumn = new System.Windows.Forms.ColumnHeader();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -63,28 +64,39 @@
             // 
             this.memoryList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.processIdColumn1,
-            this.processSizeColumn1});
+            this.processSizeColumn1,
+            this.firstSegmentColumn});
+            this.memoryList.FullRowSelect = true;
+            this.memoryList.GridLines = true;
             this.memoryList.HideSelection = false;
-            this.memoryList.Location = new System.Drawing.Point(785, 28);
+            this.memoryList.Location = new System.Drawing.Point(772, 28);
+            this.memoryList.MultiSelect = false;
             this.memoryList.Name = "memoryList";
-            this.memoryList.Size = new System.Drawing.Size(203, 159);
+            this.memoryList.Size = new System.Drawing.Size(268, 159);
             this.memoryList.TabIndex = 1;
             this.memoryList.UseCompatibleStateImageBehavior = false;
             this.memoryList.View = System.Windows.Forms.View.Details;
+            this.memoryList.SelectedIndexChanged += new System.EventHandler(this.memoryList_SelectedIndexChanged);
             // 
             // processIdColumn1
             // 
             this.processIdColumn1.Text = "ID";
+            this.processIdColumn1.Width = 40;
             // 
             // processSizeColumn1
             // 
             this.processSizeColumn1.Text = "Размер";
-            this.processSizeColumn1.Width = 110;
+            this.processSizeColumn1.Width = 90;
+            // 
+            // firstSegmentColumn
+            // 
+            this.firstSegmentColumn.Text = "Первый сегмент";
+            this.firstSegmentColumn.Width = 120;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(785, 5);
+            this.label1.Location = new System.Drawing.Point(772, 5);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(147, 20);
             this.label1.TabIndex = 2;
@@ -93,7 +105,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(1046, 5);
+            this.label2.Location = new System.Drawing.Point(1094, 5);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(179, 20);
             this.label2.TabIndex = 4;
@@ -113,13 +125,17 @@
             this.swapList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.processIdColumn2,
             this.processSizeColumn2});
+            this.swapList.FullRowSelect = true;
+            this.swapList.GridLines = true;
             this.swapList.HideSelection = false;
-            this.swapList.Location = new System.Drawing.Point(1052, 28);
+            this.swapList.Location = new System.Drawing.Point(1100, 28);
+            this.swapList.MultiSelect = false;
             this.swapList.Name = "swapList";
             this.swapList.Size = new System.Drawing.Size(203, 159);
             this.swapList.TabIndex = 6;
             this.swapList.UseCompatibleStateImageBehavior = false;
             this.swapList.View = System.Windows.Forms.View.Details;
+            this.swapList.SelectedIndexChanged += new System.EventHandler(this.swapList_SelectedIndexChanged);
             // 
             // processIdColumn2
             // 
@@ -133,32 +149,35 @@
             // unloadButton
             // 
             this.unloadButton.Enabled = false;
-            this.unloadButton.Location = new System.Drawing.Point(785, 193);
+            this.unloadButton.Location = new System.Drawing.Point(772, 193);
             this.unloadButton.Name = "unloadButton";
             this.unloadButton.Size = new System.Drawing.Size(102, 29);
             this.unloadButton.TabIndex = 7;
             this.unloadButton.Text = "Завершить";
             this.unloadButton.UseVisualStyleBackColor = true;
+            this.unloadButton.Click += new System.EventHandler(this.unloadButton_Click);
             // 
             // toSwapButton
             // 
             this.toSwapButton.Enabled = false;
-            this.toSwapButton.Location = new System.Drawing.Point(999, 75);
+            this.toSwapButton.Location = new System.Drawing.Point(1047, 75);
             this.toSwapButton.Name = "toSwapButton";
             this.toSwapButton.Size = new System.Drawing.Size(41, 29);
             this.toSwapButton.TabIndex = 8;
             this.toSwapButton.Text = "=>";
             this.toSwapButton.UseVisualStyleBackColor = true;
+            this.toSwapButton.Click += new System.EventHandler(this.toSwapButton_Click);
             // 
             // fromSwapButton
             // 
             this.fromSwapButton.Enabled = false;
-            this.fromSwapButton.Location = new System.Drawing.Point(999, 110);
+            this.fromSwapButton.Location = new System.Drawing.Point(1047, 110);
             this.fromSwapButton.Name = "fromSwapButton";
             this.fromSwapButton.Size = new System.Drawing.Size(41, 29);
             this.fromSwapButton.TabIndex = 9;
             this.fromSwapButton.Text = "<=";
             this.fromSwapButton.UseVisualStyleBackColor = true;
+            this.fromSwapButton.Click += new System.EventHandler(this.fromSwapButton_Click);
             // 
             // loadButton
             // 
@@ -206,7 +225,7 @@
             this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.loadButton);
             this.groupBox1.Controls.Add(this.processSizeUpDown);
-            this.groupBox1.Location = new System.Drawing.Point(790, 248);
+            this.groupBox1.Location = new System.Drawing.Point(772, 228);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(250, 125);
             this.groupBox1.TabIndex = 13;
@@ -217,7 +236,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1267, 450);
+            this.ClientSize = new System.Drawing.Size(1322, 450);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.fromSwapButton);
             this.Controls.Add(this.toSwapButton);
@@ -258,5 +277,6 @@
         private System.Windows.Forms.NumericUpDown processSizeUpDown;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.ColumnHeader firstSegmentColumn;
     }
 }

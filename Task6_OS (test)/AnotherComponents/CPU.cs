@@ -51,17 +51,22 @@ namespace Task6_OS
         {
             return Memory.TryLoad(process);
         }
-        //public void Action(Process process)
-        //{
-        //    if (process.Location == ProcessLocation.InSwap)
-        //    {
-        //        lock (_lock)
-        //        {
-        //            Swap.Processes.Remove(process);
-        //            LoadProcess(process);
-        //            process.Location = ProcessLocation.InMemory;
-        //        }
-        //    }
-        //}
+        public void MoveToSwap(int id)
+        {
+            ProcessInfo info = Memory.Processes.Single(pInfo => pInfo.Process.Id == id);
+            Process p = info.Process;
+            Memory.Unload(info);
+            Swap.Add(p);
+        }
+        public LoadingResult MoveFromSwap(int id)
+        {
+            Process p = Swap.Processes.Single(process => process.Id == id);
+            LoadingResult result = LoadProcess(p);
+            if (result == LoadingResult.Success)
+            {
+                Swap.Processes.Remove(p);
+            }
+            return result;
+        }
     }
 }
