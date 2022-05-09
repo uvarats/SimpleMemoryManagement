@@ -28,6 +28,13 @@ namespace Task6_OS
                 return Count;
             }
         }
+        public int Size
+        {
+            get
+            {
+                return _memorySize;
+            }
+        }
         private Memory(int memorySize, int segmentSize)
         {
             _memorySize = memorySize;

@@ -31,14 +31,14 @@ namespace Task6_OS
                 {
                     while (true)
                     {
-                        Thread.Sleep(30000);
+                        Thread.Sleep(10000);
                         Random r = new Random();
                         int number = r.Next(0, 100);
                         State = number % 3 != 0 ? ProcessState.DoingSomething : ProcessState.Sleeping;
                         Console.WriteLine($"{Id} - {State}");
                         if (State == ProcessState.DoingSomething)
                         {
-                            CPU.GetInstance();
+                            CPU.GetInstance().Action(this);
                         }
                     }
                 }

@@ -44,8 +44,12 @@ namespace Task6_OS
                 }
             }
         }
-        public void LoadProcess(Process process)
+        public bool LoadProcess(Process process)
         {
+            if (process.Size > Memory.Size)
+            {
+                return false;
+            }
             LoadingResult loadingResult = LoadingResult.Unknown;
             while (loadingResult != LoadingResult.Success)
             {
@@ -65,11 +69,13 @@ namespace Task6_OS
                         break;
                 }
             }
+            return true;
         }
         public void Action(Process process)
         {
             if (process.Location == ProcessLocation.InSwap)
             {
+                Swap.Processes.Remove(process);
                 LoadProcess(process);
                 process.Location = ProcessLocation.InMemory;
             }
